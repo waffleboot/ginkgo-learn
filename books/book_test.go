@@ -67,4 +67,55 @@ var _ = Describe("Books", func() {
 			})
 		})
 	})
+
+	Describe("JSON encoding and decoding", func() {
+		It("survives the round trip", func() {
+			encoded, err := book.AsJSON()
+			Expect(err).NotTo(HaveOccurred())
+
+			decoded, err := books.NewBookFromJSON(encoded)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(decoded).To(Equal(book))
+		})
+
+		Describe("some JSON decoding edge cases", func() {
+			var err error
+
+			When("the JSON fails to parse", func() {
+				BeforeEach(func() {
+					book, err = books.NewBookFromJSON(`{
+				"title":"Les Miserables",
+				"author":"Victor Hugo",
+				"pages":2783oops
+			  }`)
+				})
+
+				It("returns a nil book", func() {
+					Expect(book).To(BeNil())
+				})
+
+				It("errors", func() {
+					Expect(err).To(MatchError(books.ErrInvalidJSON))
+				})
+			})
+
+			When("the JSON is incomplete", func() {
+				BeforeEach(func() {
+					book, err = books.NewBookFromJSON(`{
+				"title":"Les Miserables",
+				"author":"Victor Hugo"
+			  }`)
+				})
+
+				It("returns a nil book", func() {
+					Expect(book).To(BeNil())
+				})
+
+				It("errors", func() {
+					Expect(err).To(MatchError(books.ErrIncompleteJSON))
+				})
+			})
+		})
+	})
 })
