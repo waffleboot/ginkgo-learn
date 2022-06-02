@@ -62,21 +62,29 @@ var _ = Describe("Books", func() {
 		Expect(book.IsValid()).To(BeTrue())
 	})
 
-	It("can extract the author's last name", func() {
-		Expect(book.AuthorLastName()).To(Equal("Hugo"))
-	})
+	Describe("Extracting the author's first and last name", func() {
+		Context("When the author has both names", func() {
+			It("can extract the author's last name", func() {
+				Expect(book.AuthorLastName()).To(Equal("Hugo"))
+			})
 
-	It("interprets a single author name as a last name", func() {
-		book.Author = "Hugo"
-		Expect(book.AuthorLastName()).To(Equal("Hugo"))
-	})
+			It("can extract the author's first name", func() {
+				Expect(book.AuthorFirstName()).To(Equal("Victor"))
+			})
+		})
 
-	It("can extract the author's first name", func() {
-		Expect(book.AuthorFirstName()).To(Equal("Victor"))
-	})
+		Context("When the author only has one name", func() {
+			BeforeEach(func() {
+				book.Author = "Hugo"
+			})
 
-	It("returns no first name when there is a single author name", func() {
-		book.Author = "Hugo"
-		Expect(book.AuthorFirstName()).To(BeZero()) // BeZero asserts the value is the zero-value for its type.  In this case: ""
+			It("interprets the single author name as a last name", func() {
+				Expect(book.AuthorLastName()).To(Equal("Hugo"))
+			})
+
+			It("returns empty for the first name", func() {
+				Expect(book.AuthorFirstName()).To(BeZero())
+			})
+		})
 	})
 })
