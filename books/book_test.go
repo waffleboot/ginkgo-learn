@@ -8,49 +8,6 @@ import (
 )
 
 var _ = Describe("Books", func() {
-	var foxInSocks, lesMis *books.Book
-
-	BeforeEach(func() {
-		lesMis = &books.Book{
-			Title:  "Les Miserables",
-			Author: "Victor Hugo",
-			Pages:  2783,
-		}
-
-		foxInSocks = &books.Book{
-			Title:  "Fox In Socks",
-			Author: "Dr. Seuss",
-			Pages:  24,
-		}
-	})
-
-	Describe("Categorizing books", func() {
-		Context("with more than 300 pages", func() {
-			It("should be a novel", func() {
-				Expect(lesMis.Category()).To(Equal(books.CategoryNovel))
-			})
-		})
-		Context("with fewer than 300 pages", func() {
-			It("should be a short story", func() {
-				Expect(foxInSocks.Category()).To(Equal(books.CategoryShortStory))
-			})
-		})
-	})
-})
-
-var _ = Describe("Books", func() {
-	var book *books.Book
-	It("can extract the author's last name", func() {
-		book = &books.Book{
-			Title:  "Les Miserables",
-			Author: "Victor Hugo",
-			Pages:  2783,
-		}
-		Expect(book.AuthorLastName()).To(Equal("Hugo"))
-	})
-})
-
-var _ = Describe("Books", func() {
 	var book *books.Book
 
 	BeforeEach(func() {
@@ -83,6 +40,29 @@ var _ = Describe("Books", func() {
 			})
 
 			It("returns empty for the first name", func() {
+				Expect(book.AuthorFirstName()).To(BeZero())
+			})
+		})
+
+		Context("When the author has a middle name", func() {
+			BeforeEach(func() {
+				book.Author = "Victor Marie Hugo"
+			})
+
+			It("can extract the author's last name", func() {
+				Expect(book.AuthorLastName()).To(Equal("Hugo"))
+			})
+
+			It("can extract the author's first name", func() {
+				Expect(book.AuthorFirstName()).To(Equal("Victor"))
+			})
+		})
+
+		Context("When the author has no name", func() {
+			It("should not be a valid book and returns empty for first and last name", func() {
+				book.Author = ""
+				Expect(book.IsValid()).To(BeFalse())
+				Expect(book.AuthorLastName()).To(BeZero())
 				Expect(book.AuthorFirstName()).To(BeZero())
 			})
 		})
