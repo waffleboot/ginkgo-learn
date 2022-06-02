@@ -19,3 +19,15 @@ func (b *Book) Category() Category {
 	}
 	return CategoryShortStory
 }
+
+func (b *Book) AuthorLastName() string {
+	return b.Author
+}
+
+func (b *Book) AuthorFirstName() string {
+	return b.Author
+}
+
+func (b *Book) IsValid() bool {
+	return b.Title != "" && b.Author != "" && b.Pages > 0
+}
