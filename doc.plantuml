@@ -1,0 +1,47 @@
+@startmindmap
++[#Yellow] ginkgo
+-- gomega
+++ install
++++ go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
++++ go get github.com/onsi/gomega/...
++++ ginkgo version
++++[#LightGreen] $GOBIN
+++ testing
++++ *_test.go
++++ ginkgo suite (package)
+++++ specs
+++++ ginkgo bootstrap
++++++ *_suite_test.go
+++++ ginkgo generate <book>
+++ spec
++++ containers
+++++[#LightGreen] Describe
+++++[#LightGreen] Context
+++++[#LightGreen] When
++++ setup
+++++[#LightGreen] BeforeEach
++++++[#LightGreen] JustBeforeEach
+++++[#LightGreen] AfterEach
++++++ top level AfterEach
++++++[#LightGreen] JustAfterEach
+++++++ if CurrentSpecReport().Failed()
+++++++ AddReportEntry
++++++[#LightGreen] AfterAll
+++++[#LightGreen] DeferCleanup
+++++ suite
++++++[#LightGreen] BeforeSuite
++++++[#LightGreen] AfterSuite
++++ subject
+++++[#LightGreen] It
++++++[#LightGreen] Fail
++++++[#LightGreen] in goroutine / defer GinkgoRecover()
++++++[#LightGreen] GinkgoWriter
++++++[#LightGreen] By By(func)
++++++[#LightGreen] Abort
++++ "Declare in container nodes, initialize in setup nodes"
+++++ ginkgo does not allow nodes within setup or subject nodes
+++ Phases
++++ Tree Construction Phase
++++ Run Phase
+++++ ginkgo --fail-fast
+@endmindmap
