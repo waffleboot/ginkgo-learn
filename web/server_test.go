@@ -13,7 +13,7 @@ import (
 	"github.com/waffleboot/ginkgo-learn/web"
 )
 
-var _ = Describe("Server", Ordered, func() {
+var _ = Describe("Server", Serial, Ordered, func() {
 	var operationID uuid.UUID
 
 	It("creates service", func() {
