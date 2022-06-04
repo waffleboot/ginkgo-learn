@@ -1,7 +1,9 @@
 package web_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/binary"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pkg/errors"
 	"github.com/waffleboot/ginkgo-learn/web"
 
 	"github.com/gin-gonic/gin"
@@ -112,7 +115,18 @@ func createService() (uuid.UUID, error) {
 	for {
 		select {
 		case <-time.After(1 * time.Second):
-			return uuid.New(), nil
+			buf := new(bytes.Buffer)
+			seed := GinkgoRandomSeed()
+			for i := 0; i < 2; i++ {
+				if err := binary.Write(buf, binary.LittleEndian, seed); err != nil {
+					return uuid.Nil, errors.WithMessagef(err, "write ginkgo seed to buffer: seed=%d", seed)
+				}
+			}
+			operationID, err := uuid.NewRandomFromReader(buf)
+			if err != nil {
+				return uuid.Nil, errors.WithMessage(err, "generate random uuid from buffer")
+			}
+			return operationID, nil
 		case <-gCtx.Done():
 			return uuid.Nil, gCtx.Err()
 		}
