@@ -38,6 +38,8 @@
 +++++[#LightGreen] GinkgoWriter
 +++++[#LightGreen] By By(func)
 +++++[#LightGreen] Abort
++++++[#LightGreen] DescribeTable
+++++++[#LightGreen] Entry
 +++ "Declare in container nodes, initialize in setup nodes"
 ++++ ginkgo does not allow nodes within setup or subject nodes
 ++ Phases
