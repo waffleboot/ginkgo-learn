@@ -40,6 +40,7 @@
 +++++[#LightGreen] Abort
 +++++[#LightGreen] DescribeTable
 ++++++[#LightGreen] Entry
+++++++[#LightGreen] EntryDescription
 +++ "Declare in container nodes, initialize in setup nodes"
 ++++ ginkgo does not allow nodes within setup or subject nodes
 ++ Phases
