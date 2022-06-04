@@ -21,11 +21,7 @@ var _ = Describe("Books", func() {
 
 	DescribeTable("Extracting the author's first and last name",
 		func(author string, isValid bool, firstName string, lastName string) {
-			book := &books.Book{
-				Title:  "My Book",
-				Author: author,
-				Pages:  10,
-			}
+			book.Author = author
 			Expect(book.IsValid()).To(Equal(isValid))
 			Expect(book.AuthorFirstName()).To(Equal(firstName))
 			Expect(book.AuthorLastName()).To(Equal(lastName))
