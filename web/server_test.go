@@ -3,10 +3,7 @@ package web_test
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
@@ -20,43 +17,43 @@ var _ = Describe("Service", Serial, Ordered, func() {
 	waitStatus := func(status web.Status) func() {
 		return func() {
 			suiteConfig, _ := GinkgoConfiguration()
-			Eventually(func(g Gomega) web.Status {
+			Eventually(func(g Gomega) {
+				expected, err := json.Marshal(web.OperationResult{
+					Status: status,
+				})
+				g.Ω(err).To(Succeed())
+
 				url := fmt.Sprintf("%s/operations/%s", gURL, operationID)
 				req, err := http.NewRequestWithContext(gCtx, http.MethodGet, url, nil)
 				g.Ω(err).To(Succeed())
 
 				resp, err := http.DefaultClient.Do(req)
 				g.Ω(err).To(Succeed())
-				g.Ω(resp.StatusCode).To(Equal(http.StatusOK))
-
-				operationResult := new(web.OperationResult)
-				g.Ω(json.NewDecoder(resp.Body).Decode(operationResult)).To(Succeed())
-				g.Ω(resp.Body.Close()).To(Succeed())
-
-				return operationResult.Status
-			}).WithTimeout(suiteConfig.Timeout).WithPolling(1 * time.Second).Should(Equal(status))
+				defer func() {
+					g.Ω(resp.Body.Close()).To(Succeed())
+				}()
+				g.Ω(resp).To(HaveHTTPStatus(http.StatusOK))
+				g.Ω(resp).To(HaveHTTPBody(MatchJSON(expected)))
+			}, suiteConfig.Timeout, "1s").Should(Succeed())
 		}
 	}
 
 	BeforeAll(func() {
 		By("creating service", func() {
-			body := strings.NewReader("{}")
-
 			url := fmt.Sprintf("%s/services/%s", gURL, gServiceID)
-			req, err := http.NewRequestWithContext(gCtx, http.MethodPost, url, body)
+			req, err := http.NewRequestWithContext(gCtx, http.MethodPost, url, nil)
 			Ω(err).To(Succeed())
 
 			resp, err := http.DefaultClient.Do(req)
 			Ω(err).To(Succeed())
-			Ω(resp.StatusCode).To(Equal(http.StatusOK))
+			Ω(resp).To(HaveHTTPStatus(http.StatusOK))
 
 			mutableResponse := new(web.MutableResponse)
-
 			Ω(json.NewDecoder(resp.Body).Decode(mutableResponse)).To(Succeed())
+			defer func() {
+				Ω(resp.Body.Close()).To(Succeed())
+			}()
 			Ω(mutableResponse.ServiceID).To(Equal(gServiceID))
-
-			Ω(resp.Body.Close()).To(Succeed())
-
 			operationID = mutableResponse.OperationID
 		})
 
@@ -70,15 +67,11 @@ var _ = Describe("Service", Serial, Ordered, func() {
 
 		resp, err := http.DefaultClient.Do(req)
 		Ω(err).To(Succeed())
-		Ω(resp.StatusCode).To(Equal(http.StatusOK))
-
-		data, err := io.ReadAll(resp.Body)
-		Ω(err).To(Succeed())
-
-		status := web.Status(string(data))
-		Ω(status).To(Equal(web.StatusRunning))
-
-		Ω(resp.Body.Close()).To(Succeed())
+		defer func() {
+			Ω(resp.Body.Close()).To(Succeed())
+		}()
+		Ω(resp).To(HaveHTTPStatus(http.StatusOK))
+		Ω(resp).To(HaveHTTPBody(BeEquivalentTo(web.StatusRunning)))
 	})
 
 	AfterAll(func() {
@@ -89,7 +82,10 @@ var _ = Describe("Service", Serial, Ordered, func() {
 
 			resp, err := http.DefaultClient.Do(req)
 			Ω(err).To(Succeed())
-			Ω(resp.StatusCode).To(Equal(http.StatusOK))
+			defer func() {
+				Ω(resp.Body.Close()).To(Succeed())
+			}()
+			Ω(resp).To(HaveHTTPStatus(http.StatusOK))
 		})
 
 		By("waiting deleted state", waitStatus(web.StatusDeleted))

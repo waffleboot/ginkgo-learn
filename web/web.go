@@ -3,8 +3,8 @@ package web
 import "github.com/google/uuid"
 
 type MutableResponse struct {
-	ServiceID   uuid.UUID
-	OperationID uuid.UUID
+	ServiceID   uuid.UUID `json:"service_id"`
+	OperationID uuid.UUID `json:"operation_id"`
 }
 
 type Status string
@@ -17,5 +17,5 @@ var (
 )
 
 type OperationResult struct {
-	Status Status
+	Status Status `json:"status"`
 }
