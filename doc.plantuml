@@ -31,6 +31,7 @@
 ++++ suite
 +++++[#LightGreen] BeforeSuite
 +++++[#LightGreen] AfterSuite
+++++ SynchronizedBeforeSuite
 +++ subject
 ++++[#LightGreen] It
 +++++[#LightGreen] Fail

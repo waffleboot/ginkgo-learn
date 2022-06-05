@@ -19,23 +19,15 @@ import (
 )
 
 var (
-	gStatus    web.Status
-	gServiceID uuid.UUID
-	gCtx       context.Context
-	gURL       string
+	gHttpServer *httptest.Server
+	gStatus     web.Status
+	gServiceID  uuid.UUID
+	gCtx        context.Context
+	gURL        string
 )
 
-var _ = BeforeSuite(func() {
-	gServiceID = uuid.New()
-
-	GinkgoWriter.Printf("ServiceID=%s", gServiceID)
-
-	suiteConfig, _ := GinkgoConfiguration()
-
-	ctx, cancel := context.WithTimeout(context.Background(), suiteConfig.Timeout)
-	DeferCleanup(cancel)
-
-	router := gin.Default()
+var _ = SynchronizedBeforeSuite(func() []byte {
+	router := gin.New()
 
 	router.POST("/services/:serviceID", func(c *gin.Context) {
 		serviceID, err := uuid.Parse(c.Param("serviceID"))
@@ -86,12 +78,24 @@ var _ = BeforeSuite(func() {
 		c.String(http.StatusOK, "deleting")
 	})
 
-	srv := httptest.NewServer(router)
-	DeferCleanup(srv.Close)
+	gHttpServer = httptest.NewServer(router)
 
-	gURL = srv.URL
+	return []byte(gHttpServer.URL)
+}, func(b []byte) {
+	gURL = string(b)
+
+	gServiceID = uuid.New()
+
+	suiteConfig, _ := GinkgoConfiguration()
+
+	ctx, cancel := context.WithTimeout(context.Background(), suiteConfig.Timeout)
+	DeferCleanup(cancel)
 
 	gCtx = ctx
+})
+
+var _ = SynchronizedAfterSuite(func() {}, func() {
+	gHttpServer.Close()
 })
 
 func TestWeb(t *testing.T) {

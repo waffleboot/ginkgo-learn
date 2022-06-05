@@ -37,28 +37,26 @@ var _ = Describe("Server", Serial, Ordered, func() {
 		operationID = mutableResponse.OperationID
 	})
 
-	It("waiting running state", func() {
-		By("waiting running state", func() {
-			suiteConfig, _ := GinkgoConfiguration()
-			Eventually(func(g Gomega) web.Status {
-				url := fmt.Sprintf("%s/operations/%s", gURL, operationID)
-				req, err := http.NewRequestWithContext(gCtx, http.MethodGet, url, nil)
-				g.Expect(err).To(Succeed())
+	It("waits running state", func() {
+		suiteConfig, _ := GinkgoConfiguration()
+		Eventually(func(g Gomega) web.Status {
+			url := fmt.Sprintf("%s/operations/%s", gURL, operationID)
+			req, err := http.NewRequestWithContext(gCtx, http.MethodGet, url, nil)
+			g.Expect(err).To(Succeed())
 
-				resp, err := http.DefaultClient.Do(req)
-				g.Expect(err).To(Succeed())
-				g.Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			resp, err := http.DefaultClient.Do(req)
+			g.Expect(err).To(Succeed())
+			g.Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				operationResult := new(web.OperationResult)
-				g.Expect(json.NewDecoder(resp.Body).Decode(operationResult)).To(Succeed())
-				g.Expect(resp.Body.Close()).To(Succeed())
+			operationResult := new(web.OperationResult)
+			g.Expect(json.NewDecoder(resp.Body).Decode(operationResult)).To(Succeed())
+			g.Expect(resp.Body.Close()).To(Succeed())
 
-				return operationResult.Status
-			}).WithTimeout(suiteConfig.Timeout).WithPolling(1 * time.Second).Should(Equal(web.StatusRunning))
-		})
+			return operationResult.Status
+		}).WithTimeout(suiteConfig.Timeout).WithPolling(1 * time.Second).Should(Equal(web.StatusRunning))
 	})
 
-	It("deleting service", func() {
+	It("deletes service", func() {
 		url := fmt.Sprintf("%s/services/%s", gURL, gServiceID)
 		req, err := http.NewRequestWithContext(gCtx, http.MethodDelete, url, nil)
 		Expect(err).To(Succeed())
@@ -68,7 +66,7 @@ var _ = Describe("Server", Serial, Ordered, func() {
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
 	})
 
-	It("waiting deleted state", func() {
+	It("waits deleted state", func() {
 		suiteConfig, _ := GinkgoConfiguration()
 		Eventually(func(g Gomega) web.Status {
 			url := fmt.Sprintf("%s/operations/%s", gURL, operationID)
