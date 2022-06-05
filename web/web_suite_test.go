@@ -27,7 +27,7 @@ var (
 )
 
 var _ = SynchronizedBeforeSuite(func() []byte {
-	router := gin.New()
+	router := gin.Default()
 
 	router.POST("/services/:serviceID", func(c *gin.Context) {
 		serviceID, err := uuid.Parse(c.Param("serviceID"))
@@ -76,6 +76,15 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		}
 
 		c.String(http.StatusOK, "deleting")
+	})
+
+	router.GET("/services/:serviceID", func(c *gin.Context) {
+		if _, err := uuid.Parse(c.Param("serviceID")); err != nil {
+			c.Error(err)
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		c.String(http.StatusOK, string(gStatus))
 	})
 
 	gHttpServer = httptest.NewServer(router)
